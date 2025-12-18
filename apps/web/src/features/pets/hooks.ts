@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { petsApi } from './api';
-import { CreatePetInput } from './types';
+import { CreatePetInput, UpdatePetInput } from './types';
 
 export const usePets = () => {
   return useQuery({
@@ -36,6 +36,18 @@ export const useVaccinatePet = () => {
 
   return useMutation({
     mutationFn: (id: string) => petsApi.vaccinate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pets'] });
+    },
+  });
+};
+
+export const useUpdatePet = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: UpdatePetInput }) =>
+      petsApi.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pets'] });
     },

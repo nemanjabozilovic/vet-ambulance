@@ -121,3 +121,45 @@ petsRoutes.patch('/:id/deactivate', petsController.deactivate);
  */
 petsRoutes.patch('/:id/vaccinate', petsController.vaccinate);
 
+/**
+ * @swagger
+ * /api/pets/{id}:
+ *   patch:
+ *     summary: Update a pet
+ *     tags: [Pets]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Pet ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdatePetInput'
+ *     responses:
+ *       200:
+ *         description: Pet updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Pet'
+ *       404:
+ *         description: Pet not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+petsRoutes.patch('/:id', petsController.update);
+

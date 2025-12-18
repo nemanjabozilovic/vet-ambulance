@@ -1,5 +1,5 @@
 import { petsRepository } from './pets.repository';
-import { CreatePetInput } from './pets.schemas';
+import { CreatePetInput, UpdatePetInput } from './pets.schemas';
 import { PetWithVeterinarian } from './pets.types';
 import { BadRequestError, NotFoundError } from '../../shared/errors';
 import { veterinariansRepository } from '../veterinarians/veterinarians.repository';
@@ -44,6 +44,19 @@ export const petsService = {
     }
 
     return petsRepository.vaccinate(id);
+  },
+
+  update: async (id: string, data: UpdatePetInput): Promise<PetWithVeterinarian> => {
+    await findPetOrThrow(id);
+
+    if (data.veterinarianId) {
+      const veterinarian = await veterinariansRepository.findById(data.veterinarianId);
+      if (!veterinarian) {
+        throw new NotFoundError('Veterinarian not found');
+      }
+    }
+
+    return petsRepository.update(id, data);
   },
 };
 

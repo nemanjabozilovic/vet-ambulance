@@ -1,5 +1,5 @@
 import { http } from '@/lib/http';
-import { Pet, CreatePetInput } from './types';
+import { Pet, CreatePetInput, UpdatePetInput } from './types';
 
 export const petsApi = {
   getAll: async (): Promise<Pet[]> => {
@@ -22,6 +22,13 @@ export const petsApi = {
   vaccinate: async (id: string): Promise<Pet> => {
     return http<Pet>(`/api/pets/${id}/vaccinate`, {
       method: 'PATCH',
+    });
+  },
+
+  update: async (id: string, data: UpdatePetInput): Promise<Pet> => {
+    return http<Pet>(`/api/pets/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
     });
   },
 };

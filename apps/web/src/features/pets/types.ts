@@ -21,3 +21,12 @@ export interface CreatePetInput {
   veterinarianId: string;
 }
 
+export interface UpdatePetInput {
+  name?: string;
+  ownerName?: string;
+  birthDate?: string;
+  isVaccinated?: boolean;
+  imageUrl?: string;
+  veterinarianId?: string;
+}
+

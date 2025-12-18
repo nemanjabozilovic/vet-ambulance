@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { petsService } from './pets.service';
-import { createPetSchema } from './pets.schemas';
+import { createPetSchema, updatePetSchema } from './pets.schemas';
 import { BadRequestError } from '../../shared/errors';
 
 async function handleRequest<T>(
@@ -47,6 +47,16 @@ export const petsController = {
   vaccinate: async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     await handleRequest(() => petsService.vaccinate(id), res, next);
+  },
+
+  update: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const validatedData = updatePetSchema.parse(req.body);
+      await handleRequest(() => petsService.update(id, validatedData), res, next);
+    } catch (error) {
+      handleValidationError(error, next);
+    }
   },
 };
 

@@ -1,5 +1,5 @@
 import { prisma } from '../../infra/prisma/client';
-import { CreatePetInput } from './pets.schemas';
+import { CreatePetInput, UpdatePetInput } from './pets.schemas';
 import { PetWithVeterinarian } from './pets.types';
 
 const includeVeterinarian = {
@@ -52,6 +52,21 @@ export const petsRepository = {
     return prisma.pet.update({
       where: { id },
       data: { isVaccinated: true },
+      include: includeVeterinarian,
+    });
+  },
+
+  update: async (id: string, data: UpdatePetInput): Promise<PetWithVeterinarian> => {
+    return prisma.pet.update({
+      where: { id },
+      data: {
+        ...(data.name && { name: data.name }),
+        ...(data.ownerName && { ownerName: data.ownerName }),
+        ...(data.birthDate && { birthDate: new Date(data.birthDate) }),
+        ...(data.isVaccinated !== undefined && { isVaccinated: data.isVaccinated }),
+        ...(data.imageUrl && { imageUrl: data.imageUrl }),
+        ...(data.veterinarianId && { veterinarianId: data.veterinarianId }),
+      },
       include: includeVeterinarian,
     });
   },
