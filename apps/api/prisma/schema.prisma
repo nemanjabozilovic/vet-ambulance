@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Veterinarian {
+  id        String   @id @default(uuid())
+  firstName String
+  lastName  String
+  specialty String
+  pets      Pet[]
+
+  @@map("veterinarians")
+}
+
+model Pet {
+  id            String       @id @default(uuid())
+  name          String
+  ownerName     String
+  birthDate     DateTime
+  isVaccinated  Boolean      @default(false)
+  imageUrl      String
+  isActive      Boolean      @default(true)
+  veterinarianId String
+  veterinarian Veterinarian  @relation(fields: [veterinarianId], references: [id])
+
+  @@map("pets")
+}
+
