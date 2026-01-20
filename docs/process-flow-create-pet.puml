@@ -1,0 +1,91 @@
+@startuml Process Flow - Create New Pet
+
+!theme plain
+skinparam activity {
+  BackgroundColor lightgreen
+  BorderColor darkgreen
+}
+skinparam decision {
+  BackgroundColor lightyellow
+  BorderColor orange
+}
+skinparam start {
+  BackgroundColor lightblue
+}
+skinparam end {
+  BackgroundColor lightcoral
+}
+
+start
+
+:User opens form to create new pet;
+
+:Frontend calls API to get list of veterinarians;
+
+:API returns list of available veterinarians;
+
+:User fills form with pet data:\n- Pet name\n- Owner name\n- Birth date\n- Image URL\n- Vaccination status\n- Selected veterinarian;
+
+:User clicks "Save";
+
+partition "Validation" {
+  :Frontend validates entered data;
+  
+  if (Data is valid?) then (yes)
+  else (no)
+    :Show validation errors;
+    stop
+  endif
+}
+
+partition "Backend Processing" {
+  :Frontend sends POST request to /api/pets;
+  
+  :PetsController receives request;
+  
+  :PetsController validates data\nusing CreatePetSchema;
+  
+  if (Validation successful?) then (no)
+    :Return BadRequestError;
+    stop
+  endif
+  
+  :PetsController calls PetsService.create();
+  
+  :PetsService checks if veterinarian exists;
+  
+  if (Veterinarian exists?) then (no)
+    :Return NotFoundError\n"Veterinarian not found";
+    stop
+  endif
+  
+  :PetsService calls PetsRepository.create();
+  
+  :PetsRepository creates new Pet entity\nin database;
+  
+  :Prisma generates UUID for id;
+  
+  :Prisma sets isActive = true;
+  
+  :Prisma creates relationship with Veterinarian;
+}
+
+:Repository returns created pet\nwith veterinarian data;
+
+:Service returns result to Controller;
+
+:Controller returns HTTP 201 Created\nwith JSON pet data;
+
+partition "Frontend Response" {
+  :Frontend receives response;
+  
+  :Shows success message;
+  
+  :Redirects user to pets list;
+  
+  :Refreshes pets list;
+}
+
+stop
+
+@enduml

@@ -35,13 +35,19 @@ services:
     build:
       context: .
       dockerfile: apps/api/Dockerfile
+      args:
+        PORT: ${PORT:-29790}
     container_name: vet-ambulance-api
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-vet_ambulance}
       NODE_ENV: development
-      PORT: 3001
+      PORT: ${PORT:-29790}
+      PGHOST: db
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-postgres}
+      PGDATABASE: ${POSTGRES_DB:-vet_ambulance}
     ports:
-      - "3001:3001"
+      - "${PORT:-29790}:${PORT:-29790}"
     depends_on:
       db:
         condition: service_healthy
@@ -57,11 +63,15 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        VITE_PORT: ${VITE_PORT:-20193}
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:29790}
     container_name: vet-ambulance-web
     environment:
-      VITE_API_URL: http://localhost:3001
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:29790}
+      VITE_PORT: ${VITE_PORT:-20193}
     ports:
-      - "5173:5173"
+      - "${VITE_PORT:-20193}:${VITE_PORT:-20193}"
     depends_on:
       - api
     volumes:

@@ -17,7 +17,12 @@ COPY apps/web/postcss.config.js apps/web/
 
 WORKDIR /app/apps/web
 
-EXPOSE 5173
+ARG VITE_PORT=20193
+ARG VITE_API_URL=http://localhost:29790
+ENV VITE_PORT=${VITE_PORT}
+ENV VITE_API_URL=${VITE_API_URL}
+
+EXPOSE ${VITE_PORT}
 
 CMD ["npm", "run", "dev", "--", "--host"]
 

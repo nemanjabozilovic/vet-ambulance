@@ -1,0 +1,82 @@
+@startuml Process Flow - Vaccinate Pet
+
+!theme plain
+skinparam activity {
+  BackgroundColor lightgreen
+  BorderColor darkgreen
+}
+skinparam decision {
+  BackgroundColor lightyellow
+  BorderColor orange
+}
+skinparam start {
+  BackgroundColor lightblue
+}
+skinparam end {
+  BackgroundColor lightcoral
+}
+
+start
+
+:User views list of active pets;
+
+:User identifies pet\nto be vaccinated;
+
+:User clicks "Vaccinate" button\nnext to specific pet;
+
+partition "API Request" {
+  :Frontend sends PATCH request\nto /api/pets/:id/vaccinate;
+  
+  :PetsController receives request\nwith pet ID;
+  
+  :PetsController calls\nPetsService.vaccinate(id);
+}
+
+partition "Business Logic" {
+  :PetsService calls\nPetsRepository.findById(id);
+  
+  :Repository checks database;
+  
+  if (Pet exists?) then (no)
+    :Return NotFoundError\n"Pet not found";
+    stop
+  endif
+  
+  :Service checks if pet is already vaccinated;
+  
+  if (Pet is already vaccinated?) then (yes)
+    :Return BadRequestError\n"Pet is already vaccinated";
+    stop
+  endif
+}
+
+partition "Database Update" {
+  :PetsService calls\nPetsRepository.vaccinate(id);
+  
+  :Repository executes UPDATE\non Pet entity;
+  
+  :Set isVaccinated = true;
+  
+  :Return updated pet\nwith veterinarian data;
+}
+
+:Service returns result to Controller;
+
+:Controller returns HTTP 200 OK\nwith JSON updated pet data;
+
+partition "Frontend Response" {
+  :Frontend receives response;
+  
+  if (Operation successful?) then (yes)
+    :Show success message\n"Pet vaccinated successfully";
+    :Refresh pets list;
+    :Update status in table\n(show as vaccinated);
+  else (no)
+    :Show error;
+    :Keep status unchanged;
+  endif
+}
+
+stop
+
+@enduml

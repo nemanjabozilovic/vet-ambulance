@@ -1,0 +1,77 @@
+@startuml UML Use Case Diagram - Veterinary Ambulance
+
+!theme plain
+skinparam usecase {
+  BackgroundColor lightblue
+  BorderColor darkblue
+}
+
+skinparam actor {
+  BackgroundColor lightyellow
+  BorderColor orange
+}
+
+left to right direction
+
+actor "User" as User
+
+rectangle "Veterinary Ambulance System" {
+  ' Veterinarian Use Cases
+  usecase "View all veterinarians" as UC1
+  
+  ' Pet Management Use Cases
+  usecase "View all active pets" as UC2
+  usecase "Create new pet" as UC3
+  usecase "Update pet information" as UC4
+  usecase "Vaccinate pet" as UC5
+  usecase "Deactivate pet" as UC6
+  
+  ' Validation and Checking Use Cases
+  usecase "Validate pet data" as VAL1
+  usecase "Check if veterinarian exists" as CHECK1
+  usecase "Check if pet exists" as CHECK2
+  usecase "Check if pet is already vaccinated" as CHECK3
+  
+  ' Extend relationships (optional behaviors)
+  UC3 <.. VAL1 : <<extend>>
+  UC4 <.. VAL1 : <<extend>>
+  UC5 <.. CHECK3 : <<extend>>
+  
+  ' Include relationships (shared behaviors)
+  UC3 .> CHECK1 : <<include>>
+  UC4 .> CHECK1 : <<include>>
+  UC4 .> CHECK2 : <<include>>
+  UC5 .> CHECK2 : <<include>>
+  UC6 .> CHECK2 : <<include>>
+}
+
+' Actor relationships
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+
+note right of UC3
+  User enters:
+  - Pet name
+  - Owner name
+  - Birth date
+  - Image URL
+  - Vaccination status
+  - Assign veterinarian
+end note
+
+note right of UC5
+  Pet must be active
+  and must not be already vaccinated
+end note
+
+note right of UC6
+  Soft delete - pet is
+  deactivated but not deleted
+  from database
+end note
+
+@enduml

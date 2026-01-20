@@ -1,0 +1,143 @@
+@startuml UML Class Diagram - Veterinary Ambulance
+
+!theme plain
+skinparam classAttributeIconSize 0
+
+' Domain Models
+class Veterinarian {
+  - id: String
+  - firstName: String
+  - lastName: String
+  - specialty: String
+  + pets: Pet[]
+}
+
+class Pet {
+  - id: String
+  - name: String
+  - ownerName: String
+  - birthDate: DateTime
+  - isVaccinated: Boolean
+  - imageUrl: String
+  - isActive: Boolean
+  - veterinarianId: String
+  + veterinarian: Veterinarian
+}
+
+' Controller Layer
+class PetsController {
+  + getAll(): Promise<Pet[]>
+  + create(data: CreatePetInput): Promise<Pet>
+  + update(id: String, data: UpdatePetInput): Promise<Pet>
+  + deactivate(id: String): Promise<Pet>
+  + vaccinate(id: String): Promise<Pet>
+}
+
+class VeterinariansController {
+  + getAll(): Promise<Veterinarian[]>
+}
+
+' Service Layer
+class PetsService {
+  + getAllActive(): Promise<PetWithVeterinarian[]>
+  + create(data: CreatePetInput): Promise<PetWithVeterinarian>
+  + update(id: String, data: UpdatePetInput): Promise<PetWithVeterinarian>
+  + deactivate(id: String): Promise<PetWithVeterinarian>
+  + vaccinate(id: String): Promise<PetWithVeterinarian>
+}
+
+class VeterinariansService {
+  + getAll(): Promise<Veterinarian[]>
+}
+
+' Repository Layer
+class PetsRepository {
+  + findAllActive(): Promise<PetWithVeterinarian[]>
+  + findById(id: String): Promise<PetWithVeterinarian | null>
+  + create(data: CreatePetInput): Promise<PetWithVeterinarian>
+  + update(id: String, data: UpdatePetInput): Promise<PetWithVeterinarian>
+  + deactivate(id: String): Promise<PetWithVeterinarian>
+  + vaccinate(id: String): Promise<PetWithVeterinarian>
+}
+
+class VeterinariansRepository {
+  + findAll(): Promise<Veterinarian[]>
+  + findById(id: String): Promise<Veterinarian | null>
+}
+
+' DTOs and Schemas
+class CreatePetInput {
+  + name: String
+  + ownerName: String
+  + birthDate: DateTime
+  + isVaccinated: Boolean
+  + imageUrl: String
+  + veterinarianId: String
+}
+
+class UpdatePetInput {
+  + name?: String
+  + ownerName?: String
+  + birthDate?: DateTime
+  + isVaccinated?: Boolean
+  + imageUrl?: String
+  + veterinarianId?: String
+}
+
+class PetWithVeterinarian {
+  + Pet attributes
+  + veterinarian: Veterinarian
+}
+
+' Error Classes
+class NotFoundError {
+  + message: String
+}
+
+class BadRequestError {
+  + message: String
+}
+
+' Database - ORM (Object-Relational Mapping)
+class PrismaClient {
+  + pet: PetDelegate
+  + veterinarian: VeterinarianDelegate
+}
+note right of PrismaClient
+  ORM (Object-Relational Mapping)
+  Type-safe database client
+  Provides API for database operations
+end note
+
+' Relationships
+Veterinarian "1" *-- "many" Pet : has
+Pet --> Veterinarian : assigned to
+
+PetsController --> PetsService : uses
+VeterinariansController --> VeterinariansService : uses
+
+PetsService --> PetsRepository : uses
+PetsService --> VeterinariansRepository : uses
+VeterinariansService --> VeterinariansRepository : uses
+
+PetsService ..> NotFoundError : throws
+PetsService ..> BadRequestError : throws
+
+PetsRepository --> PrismaClient : uses
+VeterinariansRepository --> PrismaClient : uses
+
+PetsController ..> CreatePetInput : accepts
+PetsController ..> UpdatePetInput : accepts
+PetsService ..> CreatePetInput : accepts
+PetsService ..> UpdatePetInput : accepts
+PetsRepository ..> CreatePetInput : accepts
+PetsRepository ..> UpdatePetInput : accepts
+
+PetsService ..> PetWithVeterinarian : returns
+PetsRepository ..> PetWithVeterinarian : returns
+PetsController ..> Pet : returns
+
+PrismaClient --> Pet : manages
+PrismaClient --> Veterinarian : manages
+
+@enduml

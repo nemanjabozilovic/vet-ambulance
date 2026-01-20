@@ -1,0 +1,105 @@
+@startuml Process Flow - Deactivate Pet
+
+!theme plain
+skinparam activity {
+  BackgroundColor lightgreen
+  BorderColor darkgreen
+}
+skinparam decision {
+  BackgroundColor lightyellow
+  BorderColor orange
+}
+skinparam start {
+  BackgroundColor lightblue
+}
+skinparam end {
+  BackgroundColor lightcoral
+}
+
+start
+
+:User views list of active pets;
+
+:User identifies pet\nto be deactivated;
+
+:User clicks "Deactivate" button\nnext to specific pet;
+
+partition "Confirmation Dialog" {
+  :Frontend shows dialog\nfor deactivation confirmation;
+  
+  if (User confirms?) then (no)
+    :Cancel operation;
+    stop
+  endif
+}
+
+partition "API Request" {
+  :Frontend sends PATCH request\nto /api/pets/:id/deactivate;
+  
+  :PetsController receives request\nwith pet ID;
+  
+  :PetsController calls\nPetsService.deactivate(id);
+}
+
+partition "Business Logic Validation" {
+  :PetsService calls\nPetsRepository.findById(id);
+  
+  :Repository checks database;
+  
+  if (Pet exists?) then (no)
+    :Return NotFoundError\n"Pet not found";
+    stop
+  endif
+  
+  :Service checks current pet status;
+  
+  if (Pet is already deactivated?) then (yes)
+    :Return BadRequestError\n"Pet is already deactivated";
+    stop
+  endif
+}
+
+partition "Soft Delete Operation" {
+  :PetsService calls\nPetsRepository.deactivate(id);
+  
+  :Repository executes UPDATE\non Pet entity;
+  
+  note right
+    Soft Delete:
+    Set isActive = false
+    Data is NOT deleted from database
+    Pet is no longer shown
+    in active pets list
+  end note
+  
+  :Set isActive = false;
+  
+  :Return updated pet\nwith veterinarian data;
+}
+
+:Service returns result to Controller;
+
+:Controller returns HTTP 200 OK\nwith JSON updated pet data;
+
+partition "Frontend Response" {
+  :Frontend receives response;
+  
+  if (Operation successful?) then (yes)
+    :Show success message\n"Pet deactivated successfully";
+    :Remove pet from active list;
+    :Refresh pets table;
+    note right
+      Deactivated pet is
+      no longer shown in
+      active pets list, but
+      data still exists in database
+    end note
+  else (no)
+    :Show error;
+    :Keep pet in list;
+  endif
+}
+
+stop
+
+@enduml

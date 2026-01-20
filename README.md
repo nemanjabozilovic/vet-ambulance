@@ -23,7 +23,9 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/vet_ambulance
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_DB=vet_ambulance
-PORT=3001
+PORT=29790
+VITE_API_URL=http://localhost:29790
+VITE_PORT=20193
 NODE_ENV=development
 ```
 
@@ -33,18 +35,20 @@ NODE_ENV=development
 docker compose up -d db pgadmin
 ```
 
-4. Generate Prisma client and run migrations:
+4. Generate Prisma client and run migrations (if running locally):
 
 ```bash
 npm run prisma:generate
 npm run prisma:migrate
 ```
 
-5. Seed the database:
+5. Seed the database (if running locally):
 
 ```bash
 npm run prisma:seed
 ```
+
+**Note**: When running via Docker Compose (`docker compose up -d`), database migrations and seeding are automatically executed when the API container starts. You don't need to run them manually.
 
 ## Running the Application
 
@@ -56,8 +60,8 @@ Start the API server:
 npm run dev:api
 ```
 
-The API will be available at `http://localhost:3001`
-API documentation (Swagger) is available at `http://localhost:3001/api-docs`
+The API will be available at `http://localhost:29790` (port can be configured via PORT environment variable)
+API documentation (Swagger) is available at `http://localhost:29790/api-docs`
 
 Start the web application:
 
@@ -65,7 +69,7 @@ Start the web application:
 npm run dev:web
 ```
 
-The web application will be available at `http://localhost:5173`
+The web application will be available at `http://localhost:20193` (port can be configured via VITE_PORT environment variable)
 
 ### Docker Compose
 
@@ -74,6 +78,11 @@ To run everything with Docker Compose:
 ```bash
 docker compose up -d
 ```
+
+**Automatic Setup**: When you run `docker compose up`, the following happens automatically:
+- Database migrations are applied
+- Database is seeded with initial data
+- All services start in the correct order (database → API → Web)
 
 ## Useful Commands
 
@@ -87,8 +96,7 @@ docker compose up -d
 
 ## Access Points
 
-- **Web Application**: http://localhost:5173
-- **API Server**: http://localhost:3001
-- **API Documentation**: http://localhost:3001/api-docs
+- **Web Application**: http://localhost:20193 (port configurable via VITE_PORT)
+- **API Server**: http://localhost:29790 (port configurable via PORT)
+- **API Documentation**: http://localhost:29790/api-docs
 - **pgAdmin**: http://localhost:5050 (admin@admin.com / admin)
-
